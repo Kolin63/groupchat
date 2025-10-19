@@ -1,45 +1,35 @@
-//
-// server.cpp
-// ~~~~~~~~~~
-//
-// Copyright (c) 2003-2025 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
+// SPDX-License-Identifier: MIT
+// Copyright (c) Colin Melican 2025
 
-#include <asio.hpp>
+#include <stddef.h>
+
 #include <ctime>
 #include <iostream>
 #include <string>
 
-using asio::ip::tcp;
+#include <asio.hpp>
 
-std::string make_daytime_string() {
-  using namespace std; // For time_t, time and ctime;
-  time_t now = time(0);
-  return ctime(&now);
-}
+using asio::ip::tcp;
 
 int main() {
   std::cout << "Starting server\n";
   try {
     asio::io_context io_context;
 
-    tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 13));
+    tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 63101));
 
-    for (;;) {
+    while (true) {
       tcp::socket socket(io_context);
       acceptor.accept(socket);
 
-      std::string message = make_daytime_string();
+      std::string message{"Hello, Client!"};
 
       std::error_code ignored_error;
       asio::write(socket, asio::buffer(message), ignored_error);
       std::cout << "Returned " << message << '\n';
     }
-  } catch (std::exception &e) {
-    std::cerr << e.what() << std::endl;
+  } catch (std::exception& e) {
+    std::cerr << e.what() << '\n';
   }
 
   return 0;
