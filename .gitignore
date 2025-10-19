@@ -3,3 +3,6 @@ client
 server
 !src/client
 !src/server
+.cache/
+compile_commands.json
+include/

@@ -1,5 +1,5 @@
 CXX := g++
-CXXFLAGS := -std=c++20 -Wall -Wextra -Wpedantic -MMD -MP
+CXXFLAGS := -std=c++20 -Wall -Wextra -Wpedantic -Iinclude -MMD -MP
 
 SRC_DIR := src
 BUILD_DIR := build
@@ -21,22 +21,22 @@ DEPS := $(COMMON_OBJS:.o=.d) $(SERVER_OBJS:.o=.d) $(CLIENT_OBJS:.o=.d)
 all: $(SERVER_TARGET) $(CLIENT_TARGET)
 
 $(SERVER_TARGET): $(COMMON_OBJS) $(SERVER_OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 $(CLIENT_TARGET): $(COMMON_OBJS) $(CLIENT_OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 $(BUILD_DIR)/common_%.o: $(SRC_DIR)/common/%.cpp
 	@mkdir -p $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@ $(LDFLAGS)
 
 $(BUILD_DIR)/server_%.o: $(SRC_DIR)/server/%.cpp
 	@mkdir -p $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@ $(LDFLAGS)
 
 $(BUILD_DIR)/client_%.o: $(SRC_DIR)/client/%.cpp
 	@mkdir -p $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@ $(LDFLAGS)
 
 -include $(DEPS)
 
