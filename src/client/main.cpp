@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
       std::cout << "Please enter your message:\n> ";
       std::getline(std::cin, text, '\n');
 
-      if (text.length() > 50) text = text.substr(0, 50);
+      if (text.length() > 500) text = text.substr(0, 500);
 
       msg.set_message(text);
 
