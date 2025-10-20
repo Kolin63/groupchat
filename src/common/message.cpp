@@ -23,18 +23,6 @@ Message::Message(Action action) : action_{action} {}
 Message::Message(Action action, std::string_view message)
     : action_{action}, message_{message} {}
 
-void Message::operator=(std::string_view raw) {
-  if (raw.length() >= 1) {
-    if (raw[0] == 'p')
-      action_ = Action::send;
-    else
-      action_ = Action::get;
-  }
-  if (raw.length() > 1) {
-    message_ = raw.substr(1, raw.length() - 2);
-  }
-}
-
 std::string Message::raw() const {
   const char a{(action_ == Action::send) ? 's' : 'g'};
   return a + message_;

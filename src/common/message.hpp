@@ -17,8 +17,6 @@ class Message {
   explicit Message(Action action);
   Message(Action action, std::string_view message);
 
-  void operator=(std::string_view raw);
-
   std::string raw() const;
 
   friend std::ostream& operator<<(std::ostream& os, Action a);
