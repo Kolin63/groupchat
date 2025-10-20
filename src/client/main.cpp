@@ -28,18 +28,14 @@ std::ostream& operator<<(std::ostream& os, Action a) {
 
 int main(int argc, char* argv[]) {
   Action action{Action::get};
-  std::string message{""};
   std::string host{"kolin63.com"};
   std::string port{"63101"};
   switch (argc) {
-    case 5:
-      port = argv[4];
-      [[fallthrough]];
     case 4:
-      host = argv[3];
+      port = argv[3];
       [[fallthrough]];
     case 3:
-      message = argv[2];
+      host = argv[2];
       [[fallthrough]];
     case 2:
       using enum Action;
@@ -47,7 +43,7 @@ int main(int argc, char* argv[]) {
       break;
     case 1:
     default:
-      std::cerr << "Usage: client [get|send] [message] [host] [port]\n";
+      std::cerr << "Usage: client [get|send] [host] [port]\n";
       return 1;
   }
 
@@ -63,13 +59,10 @@ int main(int argc, char* argv[]) {
     std::cout << "Connected to " << host << " on port " << port << '\n';
 
     if (action == Action::send) {
-      if (message.empty()) {
-        std::cout << "Please enter your message:\n> ";
-        std::cin >> std::setw(50) >> message;
-      } else if (message.length() > 50) {
-        message = message.substr(0, 50);
-      }
-      std::cout << "message: " << message << '\n';
+      std::string message{};
+      std::cout << "Please enter your message:\n> ";
+      std::getline(std::cin, message, '\n');
+      if (message.length() > 50) message = message.substr(0, 50);
       asio::write(socket, asio::buffer(message));
     }
 
