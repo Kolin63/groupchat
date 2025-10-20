@@ -2,41 +2,91 @@
 // Copyright (c) Colin Melican 2025
 // Based off of code from https://think-async.com
 
-#include <array>
+#include <cstring>
 #include <iostream>
+#include <ostream>
+#include <string>
 #include <system_error>
 
 #include <asio.hpp>
 
 using asio::ip::tcp;
 
-int main(int argc, char* argv[]) {
-  try {
-    if (argc != 2) {
-      std::cerr << "Usage: client <host>\n";
-      return 1;
-    }
+enum class Action {
+  get,
+  send,
+};
 
+std::ostream& operator<<(std::ostream& os, Action a) {
+  if (a == Action::get) {
+    os << "get";
+  } else {
+    os << "send";
+  }
+  return os;
+}
+
+int main(int argc, char* argv[]) {
+  Action action{Action::get};
+  std::string message{""};
+  std::string host{"kolin63.com"};
+  std::string port{"63101"};
+  switch (argc) {
+    case 5:
+      port = argv[4];
+      [[fallthrough]];
+    case 4:
+      host = argv[3];
+      [[fallthrough]];
+    case 3:
+      message = argv[2];
+      [[fallthrough]];
+    case 2:
+      using enum Action;
+      action = (std::strcmp(argv[1], "send") == 0 ? send : get);
+      break;
+    case 1:
+    default:
+      std::cerr << "Usage: client [get|send] [message] [host] [port]\n";
+      return 1;
+  }
+
+  try {
     asio::io_context io_context;
 
-    tcp::resolver resolver(io_context);
-    tcp::resolver::results_type endpoints{resolver.resolve(argv[1], "63101")};
+    tcp::resolver resolver{io_context};
+    tcp::resolver::results_type endpoints{resolver.resolve(host, port)};
 
-    tcp::socket socket(io_context);
+    tcp::socket socket{io_context};
     asio::connect(socket, endpoints);
 
-    while (true) {
-      std::array<char, 128> buf;
-      std::error_code error;
+    std::cout << "Connected to " << host << " on port " << port << '\n';
 
-      size_t len = socket.read_some(asio::buffer(buf), error);
+    if (action == Action::send) {
+      if (message.empty()) {
+        std::cout << "Please enter your message:\n> ";
+        std::cin >> std::setw(50) >> message;
+      } else if (message.length() > 50) {
+        message = message.substr(0, 50);
+      }
+      std::cout << "message: " << message << '\n';
+      asio::write(socket, asio::buffer(message));
+    }
 
-      if (error == asio::error::eof)
-        break;  // Connection closed cleanly by peer.
-      else if (error)
-        throw std::system_error(error);  // Some other error
+    if (action == Action::get) {
+      while (true) {
+        std::array<char, 128> buf;
+        std::error_code error;
 
-      std::cout.write(buf.data(), len) << '\n';
+        size_t len{socket.read_some(asio::buffer(buf), error)};
+
+        if (error == asio::error::eof)
+          break;  // Connection closed cleanly by peer.
+        else if (error)
+          throw std::system_error(error);  // Some other error
+
+        std::cout.write(buf.data(), len) << '\n';
+      }
     }
   } catch (std::exception& e) {
     std::cerr << e.what() << '\n';
