@@ -7,10 +7,13 @@
 #include <ctime>
 #include <iostream>
 #include <string>
+#include <system_error>
 
 #include <asio.hpp>
 
 using asio::ip::tcp;
+
+std::array<char[51], 50> messages;
 
 int main() {
   std::cout << "Starting server\n";
@@ -19,9 +22,30 @@ int main() {
 
     tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 63101));
 
+    // main loop
     while (true) {
       tcp::socket socket(io_context);
       acceptor.accept(socket);
+
+      // read client message
+      while (true) {
+        std::array<char, 51> buf;
+        std::error_code error;
+
+        size_t len{socket.read_some(asio::buffer(buf), error)};
+
+        if (error == asio::error::eof)
+          break;  // Connection closed cleanly by peer.
+        else if (error)
+          throw std::system_error(error);  // Some other error
+
+        std::string message{};
+        for (size_t i{}; i < len; ++i) {
+          message += buf[i];
+        }
+
+        if (!message.empty()) std::cout << "received: " << message << '\n';
+      }
 
       std::string message{"Hello, Client!"};
 
