@@ -35,19 +35,17 @@ int main() {
       // read client message
       std::string raw{};
       std::cout << "reading... ";
-      while (true) {
-        std::array<char, 128> buf;
-        std::error_code error;
+      std::array<char, 128> buf;
+      std::error_code error;
 
-        size_t len{socket.read_some(asio::buffer(buf), error)};
+      size_t len{socket.read_some(asio::buffer(buf), error)};
 
-        if (error == asio::error::eof || len == 0)
-          break;  // Connection closed cleanly by peer.
-        else if (error)
-          throw std::system_error(error);  // Some other error
+      if (error == asio::error::eof)
+        break;  // Connection closed cleanly by peer.
+      else if (error)
+        throw std::system_error(error);  // Some other error
 
-        raw.append(buf.data(), len);
-      }
+      raw.append(buf.data(), len);
       std::cout << "done" << std::endl;
 
       Message msg{raw};

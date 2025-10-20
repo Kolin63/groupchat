@@ -59,15 +59,13 @@ int main(int argc, char* argv[]) {
 
       std::cout << "raw: " << msg.raw() << '\n';
       asio::write(socket, asio::buffer(msg.raw()));
-    }
-
-    if (msg.get_action() == Message::Action::get) {
+    } else if (msg.get_action() == Message::Action::get) {
       std::cout << "raw: " << msg.raw() << '\n';
+      asio::write(socket, asio::buffer(msg.raw()));
+      socket.shutdown(tcp::socket::shutdown_send);
       while (true) {
         std::array<char, 128> buf;
         std::error_code error;
-
-        asio::write(socket, asio::buffer(msg.raw()));
 
         std::cout << "reading... " << std::endl;
         size_t len{socket.read_some(asio::buffer(buf), error)};
