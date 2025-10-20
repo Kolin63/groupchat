@@ -73,7 +73,9 @@ int main(int argc, char* argv[]) {
         std::array<char, 128> buf;
         std::error_code error;
 
+        std::cout << "reading... " << std::endl;
         size_t len{socket.read_some(asio::buffer(buf), error)};
+        std::cout << "done\n";
 
         if (error == asio::error::eof)
           break;  // Connection closed cleanly by peer.
