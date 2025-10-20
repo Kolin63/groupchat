@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+git clone https://github.com/chriskohlhoff/asio.git
+echo "Copying include directory..."
+cp asio/asio/include include -r
+
+while [ true ]; do
+  echo -n "Remove asio/ directory? (Y/n): "
+  read input
+  [ "$input" == "" ] || [ "$input" == "y" ] || [ "$input" == "Y" ] && rm -rf asio && break
+done
+
+echo "Done"
