@@ -43,7 +43,9 @@ int main(int argc, char* argv[]) {
       break;
     case 1:
     default:
-      std::cerr << "Usage: client [get|send] [host] [port]\n";
+      std::cout << "Usage: client <get|send> [host] [port]\n";
+      std::cout << "Default host is kolin63.com\n";
+      std::cout << "Default port is 63101\n";
       return 1;
   }
 
