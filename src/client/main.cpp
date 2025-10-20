@@ -10,24 +10,12 @@
 
 #include <asio.hpp>
 
+#include "../common/message.hpp"
+
 using asio::ip::tcp;
 
-enum class Action {
-  get,
-  send,
-};
-
-std::ostream& operator<<(std::ostream& os, Action a) {
-  if (a == Action::get) {
-    os << "get";
-  } else {
-    os << "send";
-  }
-  return os;
-}
-
 int main(int argc, char* argv[]) {
-  Action action{Action::get};
+  Message msg;
   std::string host{"kolin63.com"};
   std::string port{"63101"};
   switch (argc) {
@@ -38,8 +26,8 @@ int main(int argc, char* argv[]) {
       host = argv[2];
       [[fallthrough]];
     case 2:
-      using enum Action;
-      action = (std::strcmp(argv[1], "send") == 0 ? send : get);
+      using enum Message::Action;
+      msg.set_action(std::strcmp(argv[1], "send") == 0 ? send : get);
       break;
     case 1:
     default:
@@ -60,18 +48,26 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Connected to " << host << " on port " << port << '\n';
 
-    if (action == Action::send) {
-      std::string message{};
+    if (msg.get_action() == Message::Action::send) {
+      std::string text{};
       std::cout << "Please enter your message:\n> ";
-      std::getline(std::cin, message, '\n');
-      if (message.length() > 50) message = message.substr(0, 50);
-      asio::write(socket, asio::buffer(message));
+      std::getline(std::cin, text, '\n');
+
+      if (text.length() > 50) text = text.substr(0, 50);
+
+      msg.set_message(text);
+
+      std::cout << "raw: " << msg.raw() << '\n';
+      asio::write(socket, asio::buffer(msg.raw()));
     }
 
-    if (action == Action::get) {
+    if (msg.get_action() == Message::Action::get) {
+      std::cout << "raw: " << msg.raw() << '\n';
       while (true) {
         std::array<char, 128> buf;
         std::error_code error;
+
+        asio::write(socket, asio::buffer(msg.raw()));
 
         std::cout << "reading... " << std::endl;
         size_t len{socket.read_some(asio::buffer(buf), error)};

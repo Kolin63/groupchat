@@ -14,9 +14,11 @@
 
 #include <asio.hpp>
 
+#include "../common/message.hpp"
+
 using asio::ip::tcp;
 
-std::array<std::string, 30> messages{};
+std::array<std::string, 15> messages{};
 
 int main() {
   std::cout << "Starting server\n";
@@ -31,30 +33,31 @@ int main() {
       acceptor.accept(socket);
 
       // read client message
-      std::string client_message{};
+      std::string raw{};
       std::cout << "reading... ";
       while (true) {
-        std::array<char, 51> buf;
+        std::array<char, 128> buf;
         std::error_code error;
-
-        if (socket.available() == 0) break;  // no data
 
         size_t len{socket.read_some(asio::buffer(buf), error)};
 
-        if (error == asio::error::eof)
+        if (error == asio::error::eof || len == 0)
           break;  // Connection closed cleanly by peer.
         else if (error)
           throw std::system_error(error);  // Some other error
 
-        client_message.append(buf.data(), len);
+        raw.append(buf.data(), len);
       }
       std::cout << "done" << std::endl;
 
-      if (!client_message.empty()) {
+      Message msg{raw};
+      std::cout << "received raw: " << msg.raw() << '\n';
+
+      if (msg.get_action() == Message::Action::send) {
         std::cout << "assuming send operation" << std::endl;
-        std::cout << "received: " << client_message << '\n';
+        std::cout << "received: " << raw << '\n';
         std::shift_left(messages.begin(), messages.end(), 1);
-        messages[messages.size() - 1] = client_message;
+        messages[messages.size() - 1] = msg.get_message();
       } else {
         std::cout << "assuming get operation" << std::endl;
         std::string ret{};
