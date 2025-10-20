@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) Colin Melican 2025
+// Based off of code from https://think-async.com
 
 #include <stddef.h>
 
