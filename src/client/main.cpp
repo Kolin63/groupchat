@@ -57,19 +57,15 @@ int main(int argc, char* argv[]) {
 
       msg.set_message(text);
 
-      std::cout << "raw: " << msg.raw() << '\n';
       asio::write(socket, asio::buffer(msg.raw()));
     } else if (msg.get_action() == Message::Action::get) {
-      std::cout << "raw: " << msg.raw() << '\n';
       asio::write(socket, asio::buffer(msg.raw()));
       socket.shutdown(tcp::socket::shutdown_send);
       while (true) {
         std::array<char, 128> buf;
         std::error_code error;
 
-        std::cout << "reading... " << std::endl;
         size_t len{socket.read_some(asio::buffer(buf), error)};
-        std::cout << "done\n";
 
         if (error == asio::error::eof)
           break;  // Connection closed cleanly by peer.

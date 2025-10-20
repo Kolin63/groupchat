@@ -34,7 +34,6 @@ int main() {
 
       // read client message
       std::string raw{};
-      std::cout << "reading... ";
       std::array<char, 128> buf;
       std::error_code error;
 
@@ -46,18 +45,14 @@ int main() {
         throw std::system_error(error);  // Some other error
 
       raw.append(buf.data(), len);
-      std::cout << "done" << std::endl;
 
       Message msg{raw};
-      std::cout << "received raw: " << msg.raw() << '\n';
 
       if (msg.get_action() == Message::Action::send) {
-        std::cout << "assuming send operation" << std::endl;
-        std::cout << "received: " << raw << '\n';
+        std::cout << "Received: " << raw << '\n';
         std::shift_left(messages.begin(), messages.end(), 1);
         messages[messages.size() - 1] = msg.get_message();
       } else {
-        std::cout << "assuming get operation" << std::endl;
         std::string ret{};
         for (std::string_view i : messages) {
           ret.append(i);
